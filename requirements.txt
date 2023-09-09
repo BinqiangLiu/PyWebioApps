@@ -1,1 +1,5 @@
+langchain
+python-dotenv
 pywebio
+huggingface_hub
+Requests
