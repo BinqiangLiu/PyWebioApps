@@ -1,35 +1,45 @@
-from pywebio.input import *
+from pywebio import start_server
+from pywebio.output import put_table
+from pywebio.input import input
+import os
+from dotenv import load_dotenv
+load_dotenv()
+from langchain.chains.question_answering import load_qa_chain
+from langchain import PromptTemplate, LLMChain
+from langchain import HuggingFaceHub
 
-meaning = input("What is the meaning of life?") #not the built-in method
-pill_color = select("Which one will you choose", ['Red Pill', 'Blue Pill'], multiple=True)
-device = radio("What device are you using right now?", options=["Laptop", "Desktop", "Smartphone", "Tablet"])
-os = checkbox("What operating system do you prefer for smartphones?", options=["Android", "iOS"]) 
+repo_id = "HuggingFaceH4/starchat-beta"
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = "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"
+HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
 
-from pywebio.output import *
-from pywebio.input import * 
-import time
+llm = HuggingFaceHub(repo_id=repo_id,
+                     model_kwargs={"min_length":100,
+                                   "max_new_tokens":1024, "do_sample":True,
+                                   "temperature":0.1,
+                                   "top_k":50,
+                                   "top_p":0.95, "eos_token_id":49155})
 
-with popup("Subscribe to the page"):
-    put_text("I hope you are having a great day!")
+prompt_template = """You are a very helpful AI assistant. Please response to the user's input question with as many details as possible.
+Question: {user_question}
+Helpufl AI AI Repsonse:
+"""  
+llm_chain = LLMChain(llm=llm, prompt=PromptTemplate.from_template(prompt_template))
 
-put_markdown('## Welcome to our fruit store')
-put_table([
-    ['Fruit', 'Price'],
-    ['Blueberry', 20],
-    ['Mango', 25], 
-    ['Kiwi', 15]
-    ])
+def chat_response(user_query):
+    initial_response=llm_chain.run(user_query)
+    temp_ai_response_1=initial_response.partition('<|end|>\n<|user|>\n')[0]
+    temp_ai_response_2=temp_ai_response_1.replace('<|end|>\n<|assistant|>\n', '') 
+    final_ai_response=temp_ai_response_2.replace('<|end|>\n<|system|>\n', '')   
+    print(final_ai_response)
+    return final_ai_response
 
-fruit = select("Choose your favorite Fruit", ['Blueberry', 'Mango', 'Kiwi'])
-put_text(f"You chose {fruit}. Please wait until it is served!")
-put_processbar('bar')
-for i in range(1, 11):
-    set_processbar('bar', i / 10)
-    time.sleep(0.05)
-put_markdown(f"Here is your {fruit}! Enjoy!")
-if fruit == 'Mango':
-    put_image(open('mango.jpg', 'rb').read())
-elif fruit == 'Blueberry':
-    put_image(open('noodle.jpg', 'rb').read())
-else:
-    put_image(open('kiwi.jpg', 'rb').read())
+def main():
+    while True:
+        user_query = input('Ask something')
+        put_table([
+            ['Q:', user_query],
+            ['A:', chat_response(user_query)]
+        ])
+
+if __name__ == '__main__':
+    start_server(main, port=8080, debug=True)
