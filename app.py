@@ -8,8 +8,7 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain import PromptTemplate, LLMChain
 from langchain import HuggingFaceHub
 
-repo_id = "HuggingFaceH4/starchat-beta"
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = "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"
+os.getenv('repo_id')
 HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
 
 llm = HuggingFaceHub(repo_id=repo_id,
