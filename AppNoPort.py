@@ -43,6 +43,6 @@ def main():
 
 if __name__ == '__main__':
 #    start_server(main, port=8080, debug=True)
-    start_server(main, port=10000, debug=True)  
+    start_server(main, port=10000, debug=False)  
     start_server(main, debug=True)
 #port must be designated  
