@@ -6,9 +6,10 @@ from dotenv import load_dotenv
 load_dotenv()
 from langchain.chains.question_answering import load_qa_chain
 from langchain import PromptTemplate, LLMChain
+from langchain.prompts import PromptTemplate
 from langchain import HuggingFaceHub
 
-os.getenv('repo_id')
+repo_id=os.getenv('repo_id')
 HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
 
 llm = HuggingFaceHub(repo_id=repo_id,
